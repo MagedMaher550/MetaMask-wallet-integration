@@ -1,73 +1,150 @@
-# React + TypeScript + Vite
+# Web3 Wallet Dashboard
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern, dark-themed Web3 wallet dashboard built with React and TypeScript. Connect your Ethereum wallet and view real-time balances for ETH and USDT tokens on Ethereum Mainnet.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- 🔗 **Wallet Connection**: Connect your MetaMask or other injected wallet providers
+- 💰 **Balance Display**: View real-time ETH and USDT balances
+- 📋 **Address Copy**: Copy wallet address to clipboard with visual feedback
+- 🎨 **Modern UI**: Beautiful dark-themed interface with Material-UI components
+- ⚡ **Loading States**: Smooth skeleton loaders during data fetching
+- 📱 **Responsive Design**: Works seamlessly on desktop and mobile devices
+- 🔒 **Secure**: Uses Wagmi v3 for secure wallet interactions
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **React 19** - UI library
+- **TypeScript** - Type-safe development
+- **Vite** - Fast build tool and dev server
+- **Wagmi v3** - React Hooks for Ethereum
+- **Viem** - TypeScript Ethereum library
+- **Material-UI (MUI) v7** - Component library
+- **React Query** - Data fetching and caching
+- **Ethereum Mainnet** - Blockchain network
 
-## Expanding the ESLint configuration
+## Prerequisites
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- Node.js (v18 or higher)
+- npm, yarn, or pnpm
+- MetaMask or another Web3 wallet browser extension
+- Infura API key (for Ethereum Mainnet RPC)
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Installation
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+1. Clone the repository:
+```bash
+git clone <repository-url>
+cd getblocks-assesment
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+2. Install dependencies:
+```bash
+npm install
+# or
+yarn install
+# or
+pnpm install
 ```
+
+3. Create a `.env` file in the root directory:
+```env
+VITE_INFURA_PROJECT_ID=your_infura_project_id_here
+```
+
+4. Start the development server:
+```bash
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+```
+
+5. Open your browser and navigate to `http://localhost:5173`
+
+## Usage
+
+1. **Connect Wallet**: Click the "Connect Wallet" button to connect your MetaMask or injected wallet
+2. **View Balances**: Once connected, your ETH and USDT balances will be displayed automatically
+3. **Copy Address**: Click the copy icon next to your wallet address to copy it to your clipboard
+4. **Hide/Show Balance**: Toggle balance visibility using the "Hide Balance" / "Show Balance" button
+5. **Disconnect**: Click "Disconnect Wallet" to disconnect your wallet
+
+## Project Structure
+
+```
+src/
+├── components/
+│   ├── WalletSection.tsx    # Wallet connection and address display
+│   └── BalanceSection.tsx    # ETH and USDT balance cards
+├── layout/
+│   └── AppLayout.tsx         # Main app layout wrapper
+├── providers/
+│   └── AppProviders.tsx     # React Query and Wagmi providers
+├── theme/
+│   └── theme.ts              # Material-UI theme configuration
+├── web3/
+│   ├── config.ts             # Wagmi configuration
+│   └── constants.ts         # Web3 constants (USDT address, ABI)
+├── App.tsx                   # Main app component
+└── main.tsx                  # Application entry point
+```
+
+## Environment Variables
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `VITE_INFURA_PROJECT_ID` | Your Infura project ID for Ethereum Mainnet RPC | Yes |
+
+## Available Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build
+- `npm run lint` - Run ESLint
+
+## Features in Detail
+
+### Wallet Connection
+- Supports injected wallet providers (MetaMask, Coinbase Wallet, etc.)
+- Shows connection status and network information
+- Displays shortened wallet address with copy functionality
+
+### Balance Display
+- Real-time ETH balance fetching
+- USDT balance display (currently using ETH balance structure)
+- Formatted balance display with proper decimal places
+- Hide/Show balance toggle for privacy
+
+### Loading States
+- Skeleton loaders during wallet connection
+- Skeleton loaders during balance fetching
+- Prevents UI flashing during state transitions
+
+### User Experience
+- Snackbar notifications for successful actions
+- Responsive design for all screen sizes
+- Dark theme optimized for eye comfort
+
+## Browser Support
+
+- Chrome/Edge (recommended)
+- Firefox
+- Brave
+- Other Chromium-based browsers
+
+## Security Notes
+
+- This app only reads wallet data - it does not request transaction permissions
+- All wallet interactions are handled securely through Wagmi
+- No private keys are stored or transmitted
+- Always verify the app URL before connecting your wallet
+
+## License
+
+This project is private and proprietary.
+
+## Contributing
+
+This is an assessment project. For questions or issues, please contact the repository maintainer.
