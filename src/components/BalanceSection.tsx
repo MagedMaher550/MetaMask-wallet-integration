@@ -45,9 +45,21 @@ export const BalanceSection = () => {
     })
 
     const isLoadingBalances = ethBalance.isLoading || usdtBalance.isLoading
-    // Show skeleton if wallet is loading, connecting/reconnecting, OR if balances are loading
-    // Also show skeleton if accountStatus is undefined (initial load) and we don't have an address yet
-    const isLoading = isLoadingWallet || accountStatus === 'connecting' || accountStatus === 'reconnecting' || (accountStatus === undefined && !address) || (!!address && isLoadingBalances)
+
+    // Show skeleton only if:
+    // 1. Status is connecting/reconnecting AND we don't have address
+    // 2. We're loading wallet AND don't have address
+    // 3. We have address AND balances are loading
+    // NEVER show skeleton on first render if we already have address but balances aren't loading
+    // This prevents the flash on first render when wallet is already connected
+    const isLoading = 
+        address 
+            ? isLoadingBalances 
+            : (
+                accountStatus === 'connecting' || 
+                accountStatus === 'reconnecting' || 
+                isLoadingWallet
+            )
 
     return (
         <Card

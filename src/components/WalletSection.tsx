@@ -32,9 +32,20 @@ export const WalletSection = () => {
 
     const address = walletClient?.account?.address || accountAddress
     const injected = connectors.find((c) => c.id === 'injected')
-    // Show skeleton if wallet is loading, connecting, or account status is connecting/reconnecting
-    // Also show skeleton if accountStatus is undefined (initial load) and we don't have an address yet
-    const isLoading = isLoadingWallet || isConnecting || accountStatus === 'connecting' || accountStatus === 'reconnecting' || (accountStatus === undefined && !address)
+
+    // Show skeleton only if:
+    // 1. We're actively connecting (isConnecting) AND don't have address
+    // 2. Status is connecting/reconnecting AND don't have address
+    // 3. We're loading AND don't have address
+    // NEVER show skeleton if we already have an address (wallet already connected)
+    // This prevents the flash on first render when wallet is already connected
+    const isLoading = 
+        address ? false : (
+            isConnecting || 
+            accountStatus === 'connecting' || 
+            accountStatus === 'reconnecting' || 
+            isLoadingWallet
+        )
 
     const handleCopyAddress = async () => {
         if (address) {
