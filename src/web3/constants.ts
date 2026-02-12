@@ -1,5 +1,5 @@
 export const USDT_ADDRESS =
-    '0xdAC17F958D2ee523a2206206994597C13D831ec7'
+    '0xdAC17F958D2ee523a2206206994597C13D831ec7' as const
 
 export const ERC20_ABI = [
     {
