@@ -14,7 +14,8 @@ import {
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import LogoutIcon from '@mui/icons-material/Logout'
 import { useDisconnect, useWalletClient, useConnect, useAccount } from 'wagmi'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { isMobile } from '../utils/mobile'
 
 const shortenAddress = (address: string) =>
     `${address.slice(0, 6)}...${address.slice(-4)}`
@@ -25,6 +26,9 @@ export const WalletSection = () => {
     const { disconnect } = useDisconnect()
     const { connect, connectors, isPending: isConnecting } = useConnect()
     const [snackbarOpen, setSnackbarOpen] = useState(false)
+    const [snackbarMessage, setSnackbarMessage] = useState('')
+    const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'info' | 'error'>('success')
+    const [isMobileDevice, setIsMobileDevice] = useState(false)
 
     const address = walletClient?.account?.address || accountAddress
     const injected = connectors.find((c) => c.id === 'injected')
@@ -32,13 +36,60 @@ export const WalletSection = () => {
     // Also show skeleton if accountStatus is undefined (initial load) and we don't have an address yet
     const isLoading = isLoadingWallet || isConnecting || accountStatus === 'connecting' || accountStatus === 'reconnecting' || (accountStatus === undefined && !address)
 
+    useEffect(() => {
+        setIsMobileDevice(isMobile())
+    }, [])
+
     const handleCopyAddress = async () => {
         if (address) {
             try {
                 await navigator.clipboard.writeText(address)
+                setSnackbarMessage('Address copied to clipboard!')
+                setSnackbarSeverity('success')
                 setSnackbarOpen(true)
             } catch (err) {
                 console.error('Failed to copy address:', err)
+                setSnackbarMessage('Failed to copy address')
+                setSnackbarSeverity('error')
+                setSnackbarOpen(true)
+            }
+        }
+    }
+
+    const handleConnectWallet = async () => {
+        if (isMobileDevice) {
+            // For mobile, check if MetaMask mobile browser is available
+            if (typeof window !== 'undefined' && window.ethereum && injected) {
+                // MetaMask mobile browser detected, use injected connector
+                connect({ connector: injected })
+            } else {
+                // No injected provider, guide user to use MetaMask mobile browser
+                setSnackbarMessage('Please open this site in MetaMask mobile browser (Menu > Browser) or install MetaMask app')
+                setSnackbarSeverity('info')
+                setSnackbarOpen(true)
+                
+                // Also try to open MetaMask app link as fallback
+                const currentUrl = window.location.href
+                const metamaskAppDeepLink = `https://metamask.app.link/dapp/${encodeURIComponent(currentUrl)}`
+                
+                // Try to open MetaMask app after a short delay
+                setTimeout(() => {
+                    try {
+                        window.location.href = metamaskAppDeepLink
+                    } catch (err) {
+                        console.error('Failed to open MetaMask:', err)
+                    }
+                }, 500)
+            }
+        } else {
+            // Desktop: use injected connector
+            if (injected) {
+                connect({ connector: injected })
+            } else {
+                // No injected wallet found
+                setSnackbarMessage('Please install MetaMask browser extension')
+                setSnackbarSeverity('info')
+                setSnackbarOpen(true)
             }
         }
     }
@@ -124,13 +175,30 @@ export const WalletSection = () => {
                     <Stack spacing={2} alignItems="center">
                         <Typography variant="h6">No Wallet Connected</Typography>
 
-                        <Button
-                            variant="contained"
-                            onClick={() => injected && connect({ connector: injected })}
-                            sx={{ textTransform: 'none' }}
-                        >
-                            Connect Wallet
-                        </Button>
+                        {isMobileDevice ? (
+                            <Stack spacing={2} alignItems="center" width="100%">
+                                <Button
+                                    variant="contained"
+                                    onClick={handleConnectWallet}
+                                    sx={{ textTransform: 'none', width: '100%' }}
+                                    disabled={isConnecting}
+                                >
+                                    {isConnecting ? 'Connecting...' : 'Connect with MetaMask'}
+                                </Button>
+                                <Typography variant="caption" color="text.secondary" textAlign="center" px={2}>
+                                    Make sure you have MetaMask mobile app installed
+                                </Typography>
+                            </Stack>
+                        ) : (
+                            <Button
+                                variant="contained"
+                                onClick={handleConnectWallet}
+                                sx={{ textTransform: 'none' }}
+                                disabled={!injected || isConnecting}
+                            >
+                                {isConnecting ? 'Connecting...' : 'Connect Wallet'}
+                            </Button>
+                        )}
                     </Stack>
                 ) : (
                     <Stack spacing={3}>
@@ -211,17 +279,17 @@ export const WalletSection = () => {
             >
                 <Alert
                     onClose={() => setSnackbarOpen(false)}
-                    severity="success"
+                    severity={snackbarSeverity}
                     sx={{
                         width: '100%',
                         backgroundColor: '#151515',
                         color: '#fff',
                         '& .MuiAlert-icon': {
-                            color: '#22c55e',
+                            color: snackbarSeverity === 'success' ? '#22c55e' : snackbarSeverity === 'error' ? '#ef4444' : '#3b82f6',
                         },
                     }}
                 >
-                    Address copied to clipboard!
+                    {snackbarMessage}
                 </Alert>
             </Snackbar>
         </Card>
