@@ -14,6 +14,6 @@ export const isMobile = (): boolean => {
  */
 export const isMetaMaskInstalled = (): boolean => {
     if (typeof window === 'undefined') return false
-    return typeof window.ethereum !== 'undefined' && window.ethereum.isMetaMask
+    return typeof window.ethereum !== 'undefined' && window.ethereum?.isMetaMask === true
 }
 

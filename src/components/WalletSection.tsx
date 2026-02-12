@@ -14,7 +14,7 @@ import {
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import LogoutIcon from '@mui/icons-material/Logout'
 import { useDisconnect, useWalletClient, useConnect, useAccount } from 'wagmi'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { isMobile } from '../utils/mobile'
 
 const shortenAddress = (address: string) =>
@@ -28,17 +28,13 @@ export const WalletSection = () => {
     const [snackbarOpen, setSnackbarOpen] = useState(false)
     const [snackbarMessage, setSnackbarMessage] = useState('')
     const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'info' | 'error'>('success')
-    const [isMobileDevice, setIsMobileDevice] = useState(false)
+    const [isMobileDevice] = useState(() => isMobile())
 
     const address = walletClient?.account?.address || accountAddress
     const injected = connectors.find((c) => c.id === 'injected')
     // Show skeleton if wallet is loading, connecting, or account status is connecting/reconnecting
     // Also show skeleton if accountStatus is undefined (initial load) and we don't have an address yet
     const isLoading = isLoadingWallet || isConnecting || accountStatus === 'connecting' || accountStatus === 'reconnecting' || (accountStatus === undefined && !address)
-
-    useEffect(() => {
-        setIsMobileDevice(isMobile())
-    }, [])
 
     const handleCopyAddress = async () => {
         if (address) {
@@ -59,7 +55,8 @@ export const WalletSection = () => {
     const handleConnectWallet = async () => {
         if (isMobileDevice) {
             // For mobile, check if MetaMask mobile browser is available
-            if (typeof window !== 'undefined' && window.ethereum && injected) {
+            const ethereum = typeof window !== 'undefined' ? (window as Window & { ethereum?: unknown }).ethereum : undefined
+            if (ethereum && injected) {
                 // MetaMask mobile browser detected, use injected connector
                 connect({ connector: injected })
             } else {
